@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Update</title>
+</head>
+<body>
+    <form id="form">
+        <input type="file">
+        <input type="submit" value="Update Admin">
+    </form>
+
+    <script>
+        const IpPort = "http://127.0.0.1:2020";
+
+        async function login() {
+            const loginData = JSON.stringify({
+                "phone": "123",
+                "password": "Admin"
+            });
+
+            try {
+                const response = await fetch(IpPort + "/login", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: loginData
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    return true;
+                } else {
+                    alert("Login failed: " + result);
+                    return false;
+                }
+            } catch (error) {
+                console.error("Login request failed", error);
+                return false;
+            }
+        }
+
+        async function updateAdmin(file) {
+            let photoData = "";
+            if (file) {
+                const reader = new FileReader();
+                reader.readAsArrayBuffer(file);
+                await new Promise(resolve => reader.onloadend = resolve);
+                const rawData = new Uint8Array(reader.result);
+                let binary = "";
+                rawData.forEach(byte => binary += String.fromCharCode(byte));
+                photoData = btoa(binary);
+            }
+
+            const data = JSON.stringify({
+                "photo": photoData,
+                "phone": "123",
+                "password": "NewPassword",
+                "permission": "Admin",
+                "email": "murtazobroimshoevm4@gmail.com",
+                "ru": { "Name": "Update_Admin.Ru.Name" },
+                "en": { "Name": "Update_Admin.En.Name" }
+            });
+
+            try {
+                const response = await fetch(IpPort + "/updateAdmin", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: data
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert("Admin updated successfully!");
+                } else {
+                    alert("Update failed: " + result);
+                }
+            } catch (error) {
+                console.error("Update request failed", error);
+            }
+        }
+
+        document.getElementById("form").onsubmit = async (evt) => {
+            evt.preventDefault();
+            const file = evt.target[0].files[0];
+            const isLoggedIn = await login();
+            if (isLoggedIn) {
+                await updateAdmin(file);
+            }
+        };
+    </script>
+</body>
+</html>
